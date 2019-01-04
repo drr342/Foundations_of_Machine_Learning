@@ -1,0 +1,403 @@
+\documentclass{article}
+
+%\usepackage{times}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage[psamsfonts]{amssymb}
+\usepackage{latexsym}
+\usepackage{color}
+\usepackage{graphics}
+\usepackage{enumerate}
+\usepackage{amstext}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{comment}
+\usepackage[mathscr]{euscript}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{booktabs} 
+\usepackage[noend]{algpseudocode}
+\algrenewcommand\alglinenumber[1]{\footnotesize #1}
+
+\usepackage{fancyhdr}
+\usepackage[final]{main}
+
+\DeclareMathOperator{\conv}{conv}
+
+\def\Kset{\mathbb{K}}
+\def\Nset{\mathbb{N}}
+\def\Qset{\mathbb{Q}}
+\def\Rset{\mathbb{R}}
+\def\Sset{\mathbb{S}}
+\def\Zset{\mathbb{Z}}
+\def\squareforqed{\hbox{\rlap{$\sqcap$}$\sqcup$}}
+\def\qed{\ifmmode\squareforqed\else{\unskip\nobreak\hfil
+\penalty50\hskip1em\null\nobreak\hfil\squareforqed
+\parfillskip=0pt\finalhyphendemerits=0\endgraf}\fi}
+
+\DeclareMathOperator*{\E}{\rm E}
+\DeclareMathOperator*{\argmax}{\rm argmax}
+\DeclareMathOperator*{\argmin}{\rm argmin}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\supp}{sup}
+\DeclareMathOperator{\last}{last}
+\DeclareMathOperator{\Card}{Card}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\norm}[1]{\lVert#1\rVert}
+\def\vcdim{\textnormal{VCdim}}
+
+\newcommand{\cX}{{\mathcal X}}
+\newcommand{\cY}{{\mathcal Y}}
+\newcommand{\cA}{{\mathcal A}}
+\newcommand{\cB}{{\mathcal B}}
+\newcommand{\cF}{{\mathcal F}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\mat}[1]{{\mathbf #1}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bmu}{\boldsymbol{\mu}}
+\newcommand{\ba}{\mat{a}}
+\newcommand{\bu}{\mat{u}}
+\newcommand{\bw}{\mat{w}}
+\renewcommand{\v}{\mat{v}}
+\newcommand{\w}{\mat{w}}
+\newcommand{\bx}{\mat{x}}
+\newcommand{\bX}{\mat{X}}
+\newcommand{\sfp}{{\mathsf p}}
+\newcommand{\sfq}{{\mathsf q}}
+\newcommand{\Alpha}{{\boldsymbol \alpha}}
+\newcommand{\Mu}{{\boldsymbol \mu}}
+\newcommand{\ssigma}{{\boldsymbol \sigma}}
+\newcommand{\ignore}[1]{}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\be}{\begin{enumerate}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+\newcommand{\h}{\widehat}
+\newcommand{\tl}{\widetilde}
+\newcommand{\e}{\epsilon}
+\renewcommand{\H}{\text{0}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\scrH}{{\mathscr H}}
+\newcommand{\T}{\text{1}}
+\newcommand{\set}[2][]{#1 \{ #2 #1 \} }
+\newcommand{\R}{\mathfrak{R}}
+\newcommand{\hint}{\emph{hint}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\newif\ifshow
+\showtrue
+%\showfalse
+\ifshow
+\newenvironment{solution}{\vspace{.25cm}\noindent{\it Solution:}}{}
+\else
+ \excludecomment{solution}
+\fi
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textbf{Daniel Rivera Ruiz}}
+\lhead{\textbf{Foundations of Machine Learning Fall 2018\\Homework 3}}
+\cfoot{\thepage}
+
+\begin{document}
+
+\section*{A. Kernel PCA}
+
+In this problem we will analyze a hypothesis set based on KPCA projection. Let $K(x,y)$ be a kernel function, $\Phi_{K}(x)$ be its corresponding feature map and $S =\{ x_{1}, \dots, x_{m}\}$ be a sample of $m$ points. When $\Pi$ is the rank-$r$ KPCA projection, we define the (regularized) hypothesis set of linear separators in the RKHS $\mathbb{H}$ of kernel $K$ as
+
+\begin{equation}
+    H = \bigg\{x \to \langle w , \Pi \Phi_{K}(x)\rangle_{\mathbb{H}} : \lVert w \rVert_{\mathbb{H}} \leq 1 \bigg\}.
+\end{equation}
+
+This hypothesis set essentially means that the input data is projected onto a smaller dimensional subspace of the RKHS before fitting a separation hyperplane. This problem will show that we can use the eigenvectors and eigenvalues of the sample kernel matrix to give a closed form expression for the functions $h \in H$ without a need for explicit representation of the RKHS itself.
+
+Let $\mathbf{K}$ be the sample kernel matrix for kernel $K$ evaluated on $m$ points of sample $S$, that is $\mathbf{K}_{i,j} = K(x_{i},x_{j})$. Let $\lambda_{1}, \dots, \lambda_{r}$ be the top $r$ (nonzero) eigenvalues of $\mathbf{K}$ with the corresponding eigenvectors $\mathbf{v}_{1}, \dots, \mathbf{v}_{r}$. Denote the $j$-th element of vector $\mathbf{v}_{i}$ as $[\mathbf{v}_{i}]_{j}$. Follow the subproblems below to derive the explicit representation of $h \in H$.
+\begin{enumerate}
+
+\item Assume that the feature maps $\Phi_{K}(x)$ are centered on sample $S$ and recall that the sample covariance operator is $\Sigma = \sum_{i=1}^{m}\frac{1}{m}\Phi_{K}(x_{i})\Phi_{K}(x_{i})^{\top}$. Prove that $h(x) = \sum_{i=1}^{r} \alpha_{i} \langle \mathbf{u}_i , \Phi_{K}(x)\rangle_{\mathbb{H}}$ for some $\alpha_{i} \in \Rset$, where $\mathbf{u}_{1},\cdots, \mathbf{u}_{r}$ are the eigenvectors of $\Sigma$ corresponding to its top $r$ eigenvalues.\\
+
+Since $w$ is a function in the $r$-dimensional subspace of the RKHS, it can be written in the following form
+\begin{equation*}
+    w = \sum_{j=1}^ra_j\Phi_{K}(x_j)\:,\: a_j \in \Rset
+\end{equation*}
+And by definition of the KPCA projection, $\Pi \Phi_{K}(x)$ takes the following form
+\begin{align*}
+    \Pi \Phi_{K}(x) &= \mathbf{U}^{\top}\Phi_{K}(x) \\
+    &= \sum_{i=1}^r\mathbf{u}_i\Phi_{K}(x_i)(x)\\
+    &= \sum_{i=1}^r\mathbf{u}_iK(x_i,x)
+\end{align*}
+Which also coincides with the expression of a function in the $r$-dimensional subspace of the RKHS. Therefore, we can write the inner product as follows:
+\begin{align*}
+    \langle w , \Pi \Phi_{K}(x)\rangle_{\mathbb{H}} &= \sum_{i=1}^r\sum_{j=1}^rK(x_i,x)a_jK(\mathbf{u}_i,\Phi_{K}(x_j))\\
+    &= \sum_{i=1}^r\alpha_i\left\langle\mathbf{u}_i,\Phi_{K}(x)\right\rangle \textit \quad {(Q.E.D.)}
+\end{align*}
+
+\item Prove that $\mathbf{u}_i = \mathbf{X}\frac{\mathbf{v}_{i}}{\sqrt{\lambda_{i}}}$, where $\mathbf{X} = [\Phi_{K}(x_{1}),\dots,\Phi_{K}(x_{m})]$
+
+Based on the definition of $\mathbf{X}$, we can write $\mathbf{K}$ and $\mathbf{\Sigma}$ as follows:
+\begin{align*}
+    \mathbf{K} &= \left[K(x_{i},x_{j})\right]_{ij} = \left[\langle \Phi_{K}(x_i), \Phi_{K}(x_j) \rangle\right]_{ij} = \mathbf{X}^{\top}\mathbf{X}\\
+    \mathbf{\Sigma} &= \sum_{i=1}^{m}\frac{1}{m}\Phi_{K}(x_{i})\Phi_{K}(x_{i})^{\top} = \frac{1}{m} \sum_{i=1}^{m}\mathbf{X}\mathbf{X}^{\top}\\
+\end{align*}
+If we consider the singular value decomposition (SVD) of $\mathbf{X}$:
+\begin{equation*}
+    \mathbf{X} = \mathbf{U}\mathbf{S}\mathbf{V}^{\top}
+\end{equation*}
+and use the basic property in linear algebra for the transpose of a product of matrices:
+\begin{equation*}
+    \left(\prod_{i=1}^{N}\mathbf{A}_i\right)^{\top} = \prod_{i=0}^{N-1}\mathbf{A}_{N-i}^{\top}
+\end{equation*}
+we can simplify the expressions for $\mathbf{K}$ and $\mathbf{\Sigma}$:
+\begin{align*}
+    \mathbf{K} &= (\mathbf{U}\mathbf{S}\mathbf{V}^{\top})^{\top}\mathbf{U}\mathbf{S}\mathbf{V}^{\top} = \mathbf{V}\mathbf{S}^{2}\mathbf{V}^{\top}\\
+    \mathbf{\Sigma} &= \frac{1}{m} \sum_{i=1}^{m}\mathbf{U}\mathbf{S}\mathbf{V}^{\top}(\mathbf{U}\mathbf{S}\mathbf{V}^{\top})^{\top}
+    = \frac{1}{m}\mathbf{U}\mathbf{S}^{2}\mathbf{U}^{\top}\\
+\end{align*}
+Which is a direct result from the fact that $\mathbf{U}$ and $\mathbf{V}$ are unitary and $\mathbf{S}$ is diagonal according to the definition of SVD decomposition.\\
+If we look at the expression for $\mathbf{\Sigma}$ we notice that it takes the form of an SVD, with matrix of eigenvectors $\mathbf{U}$ and matrix of eigenvalues $\mathbf{\Lambda}=\mathbf{S}^2$. Similarly for $\mathbf{K}$, where the matrix of eigenvectors is $\mathbf{V}$ and the matrix of eigenvalues is the same $\mathbf{\Lambda}$.\\
+Now we return to the SVD expression for $\mathbf{X}$ and do the following manipulations to derive an expression for $\mathbf{U}$:
+\begin{align*}
+    \mathbf{U}\mathbf{S}\mathbf{V}^{\top} &= \mathbf{X}\\
+    \mathbf{U}\mathbf{S}\mathbf{V}^{\top}\mathbf{V}\mathbf{S}^{-1} &= \mathbf{X}\mathbf{V}\mathbf{S}^{-1}\\
+    \mathbf{U} &= \mathbf{X}\mathbf{V}\mathbf{\Lambda}^{-\frac{1}{2}}\\
+\end{align*}
+We can rewrite this last expression in its vector form, and since we now that $\mathbf{V}$ and $\mathbf{\Lambda}$ contain the eigenvectors and eigenvalues of $\mathbf{K}$, we get the desired result:
+\begin{equation*}
+    \mathbf{u}_i = \mathbf{X}\frac{\mathbf{v}_i}{\sqrt{\lambda_i}} \textit \quad {(Q.E.D.)}
+\end{equation*}
+
+\item Using the result above, prove that any function $h \in H$ can be represented as
+\begin{equation*}
+h(x) = \sum^{r}_{i=1} \sum^{m}_{j = 1}\frac{\alpha_{i}}{\sqrt{\lambda_{i}}} K(x_{j},x)[v_{i}]_{j},
+\end{equation*}
+for some $\alpha_{i} \in \Rset$.
+
+With the definition of $\mathbf{X} = [\Phi_{K}(x_{1}),\dots,\Phi_{K}(x_{m})]$, we can rewrite the previous result as follows:
+\begin{equation*}
+    \mathbf{u}_i = \frac{1}{\sqrt{\lambda_{i}}}\sum^{m}_{j = 1}\Phi_{K}(x_{j})[\mathbf{v}_i]_j
+\end{equation*}
+We plug in this result in the expression for $h(x)$ from the first exercise and simplify:
+\begin{align*}
+    h(x) &= \sum_{i=1}^{r} \alpha_{i} \langle \mathbf{u}_i , \Phi_{K}(x)\rangle_{\mathbb{H}}\\
+    &= \sum_{i=1}^{r} \alpha_{i} \left\langle \frac{1}{\sqrt{\lambda_{i}}}\sum^{m}_{j = 1}\Phi_{K}(x_{j})[\mathbf{v}_i]_j , \Phi_{K}(x)\right\rangle_{\mathbb{H}}\\
+    &= \sum_{i=1}^{r} \frac{\alpha_{i}}{\sqrt{\lambda_{i}}} \left\langle \sum^{m}_{j = 1}\Phi_{K}(x_{j})[\mathbf{v}_i]_j , \Phi_{K}(x)\right\rangle_{\mathbb{H}}\\
+    &= \sum_{i=1}^{r} \frac{\alpha_{i}}{\sqrt{\lambda_{i}}} \sum^{m}_{j = 1} \left\langle \Phi_{K}(x_{j})[\mathbf{v}_i]_j , \Phi_{K}(x)\right\rangle_{\mathbb{H}}\\
+    &= \sum_{i=1}^{r} \sum^{m}_{j = 1} \frac{\alpha_{i}}{\sqrt{\lambda_{i}}} [\mathbf{v}_i]_j \left\langle \Phi_{K}(x_{j}), \Phi_{K}(x)\right\rangle_{\mathbb{H}}\\
+    &= \sum_{i=1}^{r} \sum^{m}_{j = 1} \frac{\alpha_{i}}{\sqrt{\lambda_{i}}} K(x_j,x)[\mathbf{v}_i]_j \textit \quad {(Q.E.D.)}
+\end{align*}
+All the manipulations of the inner product are straightforward due to the linearity in the first argument, and the last substitution is simply the definition of the kernel function $K$.
+
+\item Bonus question: derive the Rademacher complexity bound on the hypothesis set $H$ defined in this problem.\\
+By definition of the Rademacher complexity we write:
+\begin{align*}
+    \h \R_S(H) &= \underset{\sigma}{E}\left[\underset{h \in H}{\supp}\left(\frac{1}{m}\sum_{i=1}^{m}\sigma_ih(x_i)\right)\right]\\
+    &= \frac{1}{m}\underset{\sigma}{E}\left[\underset{\lVert w \rVert \leq 1}{\supp}\left(\sum_{i=1}^{m}\sigma_i\left\langle w , \Pi \Phi_{K}(x_i) \right\rangle\right)\right]\\
+\end{align*}
+Since we are considering real variables, the inner product is linear in its second argument. Also, we introduce an absolute value ($\supp A \leq \supp |A|$ is straightforward) so we can apply the Cauchy-Schwartz inequality:
+\begin{align*}
+    \h \R_S(H) &\leq \frac{1}{m}\underset{\sigma}{E}\left[\underset{\lVert w \rVert \leq 1}{\supp}\left|\left\langle w , \sum_{i=1}^{m}\sigma_i \Pi \Phi_{K}(x_i) \right\rangle\right|\right]\\
+    &\leq \frac{1}{m}\underset{\sigma}{E}\left[\underset{\lVert w \rVert \leq 1}{\supp} ||w|| \cdot \left|\left|\sum_{i=1}^{m}\sigma_i \Pi \Phi_{K}(x_i) \right|\right|\right]\\
+\end{align*}
+Clearly the supremum occurs when $||w|| = 1$ and therefore we get
+\begin{equation*}
+    \h \R_S(H) \leq \frac{1}{m}\underset{\sigma}{E}\left[\left|\left|\sum_{i=1}^{m}\sigma_i \Pi \Phi_{K}(x_i) \right|\right|\right]\\
+\end{equation*}
+Next we introduce a square root function (concave) to apply Jensen's inequality, and expand the squared norm of the sum:
+\begin{align*}
+    \h \R_S(H) &\leq \frac{1}{m}\underset{\sigma}{E}\left[\sqrt{\left|\left|\sum_{i=1}^{m}\sigma_i \Pi \Phi_{K}(x_i) \right|\right|^2}\right]\\
+    &\leq \frac{1}{m}\left[\underset{\sigma}{E}\left[\left|\left|\sum_{i=1}^{m}\sigma_i \Pi \Phi_{K}(x_i) \right|\right|^2\right]\right]^{\frac{1}{2}}\\
+    &= \frac{1}{m}\left[\underset{\sigma}{E}\left[\sum_{i=1}^{m}\left|\left|\sigma_i \Pi \Phi_{K}(x_i) \right|\right|^2 + \sum_{i\neq j}\left\langle\sigma_i \Pi \Phi_{K}(x_i), \sigma_j \Pi \Phi_{K}(x_j) \right\rangle\right]\right]^{\frac{1}{2}}\\
+    &= \frac{1}{m}\left[\underset{\sigma}{E}\left[\sum_{i=1}^{m}\sigma_i^2\left|\left|\Pi \Phi_{K}(x_i) \right|\right|^2\right] + \underset{\sigma}{E}\left[ \sum_{i\neq j}\sigma_i \sigma_j \left\langle \Pi \Phi_{K}(x_i),  \Pi \Phi_{K}(x_j) \right\rangle\right]\right]^{\frac{1}{2}}\\
+    &= \frac{1}{m}\left[\sum_{i=1}^{m}\left|\left|\Pi \Phi_{K}(x_i) \right|\right|^2\right]^{\frac{1}{2}}
+\end{align*}
+For the last step, we notice in the first term that $\sigma_i^2=1$ (since all the $\sigma$s are Rademacher variables). Also the second term will reduce to zero, since $E[\sigma_i\sigma_j]=0$ for $i\neq j$ (again, this follows from the fact that the $\sigma$s are Rademacher variables).\\
+At this point we are left with the expression $\Pi \Phi_{K}(x_i)$, which by definition is the projection of the input data point $x_i$ over a subspace of the RKHS of dimension $r$ . From equation $(12.5)$ in the textbook, we know that this projection will take the following form
+\begin{align*}
+    \Pi \Phi_{K}(x_i) &= \Phi_{K}(x_i)^{\top}\mathbf{U}_r\\
+    &= \sqrt{\lambda_i}\mathbf{v}_{ir}\\
+\end{align*}
+Where $\mathbf{U}_r$ stands for the first $r$ columns of matrix $\mathbf{U}$ and $\mathbf{v}_{ir}$ stands for the first $r$ elements of vector $\mathbf{v}_{i}$. Since the vectors $\mathbf{v}_{i}$ by definition have norm 1, it must follow that $||\mathbf{v}_{ir}|| \leq 1$ and we write:
+\begin{align*}
+    \R_S(H) &\leq \frac{1}{m}\left[\sum_{i=1}^{m}\left|\left|\sqrt{\lambda_i}\mathbf{v}_{ir} \right|\right|^2\right]^{\frac{1}{2}} \\
+    &\leq \frac{1}{m}\left[\sum_{i=1}^{m}\lambda_i\right]^{\frac{1}{2}} \\
+\end{align*}
+Finally, we can express the bound in two different ways:
+    \begin{enumerate}[(a)]
+        \item It is a known result in linear algebra that the sum of the eigenvalues of a matrix is equal to its trace. In this particular case, the trace of $\mathbf{K}$ has elements of the form $K(x_i,x_i)$. Let $R$ be the largest of these elements and we write
+        \begin{align*}
+            \R_S(H) &\leq \frac{1}{m}\left[\sum_{i=1}^{m}K(x_i,x_i)\right]^{\frac{1}{2}} \\
+            &\leq \frac{1}{m}\sqrt{mR} \\
+            &= \sqrt{\frac{R}{m}}
+        \end{align*}
+        \item Since the eigenvalues $\lambda_i$ are ranked in decreasing order of magnitude, we know that $\lambda_i \leq \lambda_1$ for all $i$ and we write
+        \begin{align*}
+            \R_S(H) &\leq \frac{1}{m}\left[\sum_{i=1}^{m}\lambda_i\right]^{\frac{1}{2}} \\
+            &\leq \frac{1}{m}\sqrt{m\lambda_1} \\
+            &= \sqrt{\frac{\lambda_1}{m}}
+        \end{align*}
+    \end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+\section*{B. Multi-class boosting}
+Lecture 10 introduces the AdaBoost.MH algorithm, which is AdaBoost for multi-class classification. (Consult with Lecture 10's slides if you are unfamiliar with  multi-class learning setting.) AdaBoost.MH is defined by objective function $F(\alpha)$:
+\begin{align*}
+F(\alpha)&=  \sum_{l=1}^k \sum_{i=1}^m e^{- y_i[l]\sum_{t=1}^n \alpha_t h_t(x_i,l)},
+\end{align*}
+where $y_i \in \cY=\{-1,+1\}^k$, and  $y_i[l]$ denotes the $l$-th coordinate of $y_i$ for any $i\in[m]$ and $l\in[k]$. The base classifiers come from $H=\{h: \cX \times [k] \to \{-1,+1\}\}$.
+Consider an alternative objective function for the same problem:
+\begin{align*}
+G(\alpha)&= \sum_{i=1}^m e^{-\frac{1}{k} \sum_{l=1}^k y_i[l]\sum_{t=1}^n \alpha_t h_t(x_i,l)}.
+\end{align*}
+
+\begin{enumerate}
+\item Compare $G(\alpha)$ with $F(\alpha)$.
+Show that $F(\alpha)\geq k G(\alpha)$. 
+
+First we define the function $g_n(x_i,l)=\sum_{t=1}^n \alpha_t h_t(x_i,l)$ and rewrite $F(\alpha)$ and $G(\alpha)$ as follows
+\begin{align*}
+    F(\alpha) &= \sum_{l=1}^k \sum_{i=1}^m e^{-y_i[l]g_n(x_i,l)} \\
+    G(\alpha) &= \sum_{i=1}^m e^{-\frac{1}{k} \sum_{l=1}^k y_i[l]g_n(x_i,l)}
+\end{align*}
+If we interchange the order of summations in $F$ and we can prove that the inequality holds for any value of $i$, then it must also hold for the entire summation. So the problem reduces to proving that
+\begin{align*}
+    \sum_{l=1}^k e^{-y_i[l]g_n(x_i,l)} &\geq k e^{-\frac{1}{k} \sum_{l=1}^k y_i[l]g_n(x_i,l)} \\
+    \frac{1}{k} \sum_{l=1}^k e^{-y_i[l]g_n(x_i,l)} &\geq e^{-\frac{1}{k} \sum_{l=1}^k y_i[l]g_n(x_i,l)} \\
+    E\left[e^{-y_i[l]g_n(x_i,l)}\right] &\geq e^{E[-y_i[l]g_n(x_i,l)]}
+\end{align*}
+Since the exponential function is convex, the last expression coincides with Jensen's inequality and the proof is complete.
+
+\item Let $g_n(x_i,l) = \sum_{t=1}^n\alpha_th_t(x_i,l)$. Assume that $|g_n(x_i,l)| \leq 1$ for all $x_i \in \cX, l \in [k]$. Show that $kG(\alpha)$ is a convex function upper bounding the multi-label multi-class error:
+$$\sum_{i=1}^m \sum_{l=1}^k 1_{y_i[l]\ne sgn\left( g_i(x_i,l)\right)}\leq kG(\alpha).$$
+
+It is clear that $kG(\alpha)$ is a convex function since $G$ is defined as a sum of exponential (convex) functions and $k>0$. Similarly to the previous exercise, we can get rid of the summation over $i$ and only need to prove the following inequality
+\begin{equation*}
+    \sum_{l=1}^k 1_{y_i[l]\ne sgn(g_n(x_i,l))} \leq k e^{-\frac{1}{k} \sum_{l=1}^k y_i[l]g_n(x_i,l)}
+\end{equation*}
+We will start by proving that
+\begin{equation*}
+    \sum_{l=1}^k y_i[l]g_n(x_i,l) \leq k - r
+\end{equation*}
+where $r \in [0,k]$ is the number of mistakes made by the classifier. 
+\begin{itemize}
+    \item By definition the classifier predicts correctly if $y_i[l] = sgn(g_n(x_i,l))$, which means that in the previous sum positive values of $y_i[l]g_n(x_i,l)$ are associated to correct predictions and vice versa.
+    \item Since we know that $r$ is the number of errors the classifier made, the following is an upper bound on the value for the sum:
+    \begin{equation*}
+        (k-r)\cdot\underset{l:\text{correct}}{\max}(y_i[l]g_n(x_i,l)) + r\cdot\underset{l:\text{mistake}}{\max}(y_i[l]g_n(x_i,l))
+    \end{equation*}
+    \item Finally, since we know that $|g_n(x_i,l)| \leq 1$, the maximum value for the sum is given by $(k-r)\cdot1 + r\cdot0 = k - r$.
+\end{itemize}
+Now we can easily complete the proof:
+\begin{align*}
+    \sum_{l=1}^k y_i[l]g_n(x_i,l) &\leq k - r \\
+    -\frac{1}{k} \sum_{l=1}^k y_i[l]g_n(x_i,l) &\geq \frac{r-k}{k} \\
+    ke^{-\frac{1}{k} \sum_{l=1}^k y_i[l]g_n(x_i,l)} &\geq ke^{\frac{r-k}{k}} \\
+    &\geq k\left(1 + \frac{r-k}{k}\right) \\
+    &\geq r \\
+    &= \sum_{l=1}^k 1_{y_i[l]\ne sgn(g_n(x_i,l))} \textit \quad {(Q.E.D.)}
+\end{align*}
+
+\item Drive an algorithm defined by the application of coordinate descent to $G(\alpha)$. You should give a full description of your algorithm, including the pseudocode, details for the choice of the step and direction, as well as a generalization bound. 
+\end{enumerate}
+\textsc{AdaBoost.MH2}$(S = ((x_1,y_1),\ldots,(x_m,y_m))$
+\begin{algorithmic}[1]
+\For {$i \gets 1$ \textbf{to} $m$}
+    \State $D_1(i) \gets \frac{1}{m}$
+\EndFor
+\For {$t \gets 1$ \textbf{to} $T$}
+    \State $h_t \gets$ base classifier in $H$ with small error $\epsilon_t=\textnormal{Pr}_{(i,l)\sim D_t}[h_t(x_i,l)\neq y_i[l]]$
+    \State $\alpha_t \gets \frac{k}{2}\log\left(\frac{1-\epsilon_t}{\epsilon_t}\right)$
+    \State $Z_t \gets \left[2\sqrt{\epsilon_t(1-\epsilon_t)}\right]^k$
+    \For {$i \gets 1$ \textbf{to} $m$}
+        \State $S_t(i) \gets \sum_{l=1}^k y_i[l]h_t(x_i,l)$
+        \State $D_{t+1}(i) \gets \frac{D_t(i)}{Z_t}\cdot \exp\left(-\frac{\alpha_t}{k}S_t(i)\right)$
+    \EndFor
+\EndFor
+\State $g \gets \sum_{t=1}^T \alpha_t h_t$
+\State \Return $h = \textnormal{sgn}(g)$
+\end{algorithmic}
+
+This algorithm is very similar to the original \textsc{AdaBoost} for binary classification. Besides from the introduction of the auxiliary function $S_t(i) = \sum_{l=1}^k y_i[l]h_t(x_i,l)$, which we will reference throughout the analysis, the main differences are the way of calculating $\alpha_t$ and the normalization factor $Z_t$. Applying coordinate descent to the objective function $G(\boldsymbol{\alpha})$ will provide a justification for the selection of these parameters.\\
+The expression that we will be using for $G(\alpha)$ is the following:
+\begin{align*}
+    G(\alpha)&= \sum_{i=1}^m e^{-\frac{1}{k} \sum_{l=1}^k y_i[l]\sum_{t=1}^T \alpha_t h_t(x_i,l)}\\
+    &= \sum_{i=1}^m e^{-\frac{1}{k} \sum_{t=1}^T \alpha_t \sum_{l=1}^k y_i[l] h_t(x_i,l)}\\
+    &= \sum_{i=1}^m e^{-\frac{1}{k} \sum_{t=1}^T \alpha_t S_t(i)}\\
+\end{align*}
+
+\begin{enumerate}[(a)]
+    \item \textbf{Choice of the direction}\\
+    Performing a similar analysis as the one presented in the textbook, we find the direction $\mathbf{e}_t$ selected by coordinate descent:
+    \begin{align*}
+        \mathbf{e}_t &= \underset{t}{\argmin}\left.\frac{dG(\boldsymbol{\alpha}_{t-1}+\eta \mathbf{e}_t)}{d\eta}\right|_{\eta=0}\\
+        G(\boldsymbol{\alpha}_{t-1}+\eta \mathbf{e}_t) &= \sum_{i=1}^m\exp\left[-\frac{1}{k}\sum_{s=1}^{t-1}\alpha_sS_t(i)-\frac{\eta}{k}S_t(i)\right]\\
+        \left.\frac{dG}{d\eta}\right|_{\eta=0} &= -\frac{1}{k}\sum_{i=1}^mS_t(i) \exp\left[-\frac{1}{k}\sum_{s=1}^{t-1}\alpha_sS_t(i)\right]\\
+        &= -\frac{1}{k}\sum_{i=1}^m S_t(i)\left(D_t(i)\cdot m \prod_{s=1}^{t-1}Z_s\right)\\
+        &= \left(-\frac{m}{k} \prod_{s=1}^{t-1}Z_s\right)\sum_{i=1}^m S_t(i)D_t(i)
+    \end{align*}
+    To simplify the last expression, we will rewrite the summation over all values of $i$ splitting it into "bins". In each bin we will group all the data points such that $S_t(i) = k - 2r$, where $r \in [0,k]$ is the number of errors that the base classifier $h_t$ makes over all labels. Considering that for each label the base classifier makes a mistake with small probability $\epsilon_t$ we can write
+    \begin{equation*}
+        \textnormal{Pr}[\textnormal{\#Errors} = r] = \textnormal{Pr}[S_t(i) = k - 2r] = \binom{k}{r} \epsilon_t^r (1-\epsilon_t)^{k-r}
+    \end{equation*}
+    Now we can use this distribution and sum over all values of $r$ as an equivalent to the distribution $D_t$ over all values of $i$. In the original version of \emph{AdaBoost} for binary classification this part of the analysis corresponds to splitting the sample points into correctly and incorrectly classified.\\
+    Returning to the expression for the derivative of $G$ we get
+    \begin{align*}
+        \left.\frac{dG}{d\eta}\right|_{\eta=0} &= \left(-\frac{m}{k} \prod_{s=1}^{t-1}Z_s\right)\sum_{r=0}^k \binom{k}{r} \epsilon_t^r (1-\epsilon_t)^{k-r} S_t(i)\\
+        &= \left(-\frac{m}{k} \prod_{s=1}^{t-1}Z_s\right)\sum_{r=0}^k \binom{k}{r} \epsilon_t^r (1-\epsilon_t)^{k-r} (k-2r)\\
+        &= \left(-\frac{m}{k} \prod_{s=1}^{t-1}Z_s\right)(k-2k\epsilon_t)\\
+        &= \left(m \prod_{s=1}^{t-1}Z_s\right)(2\epsilon_t-1)
+    \end{align*}
+    Using \emph{Wolfram Mathematica} we get the closed form for the summation and arrive to the exact same result than for the original \emph{AdaBoost} algorithm. Since $m\prod_{s=1}^{t-1}Z_s$ is fixed and positive, the direction $\mathbf{e}_t$ selected by coordinate descent is the one minimizing $\epsilon_t$, which corresponds to the base learner $h_t$.
+    
+    \item \textbf{Choice of the step}\\
+    In a similar fashion we can find the optimum value for the step size $\eta$ by setting the derivative of $G$ equals to $0$ and solving:
+    \begin{align*}
+        \frac{dG}{d\eta} &= 0\\
+        \frac{d}{d\eta}\left[\sum_{i=1}^m\exp\left[-\frac{1}{k}\sum_{s=1}^{t-1}\alpha_sS_t(i)-\frac{\eta}{k}S_t(i)\right]\right] &= 0\\
+        \sum_{i=1}^m\exp\left[-\frac{1}{k}\sum_{s=1}^{t-1}\alpha_sS_t(i)\right]\exp\left[-\frac{\eta}{k}S_t(i)\right]\left(-\frac{S_t(i)}{k}\right) &= 0\\
+        \sum_{i=1}^m \left(D_t(i)\cdot m \prod_{s=1}^{t-1}Z_s\right)\exp\left[-\frac{\eta}{k}S_t(i)\right]\left(-\frac{S_t(i)}{k}\right) &= 0\\
+        \sum_{r=0}^k \binom{k}{r} \epsilon_t^r (1-\epsilon_t)^{k-r} e^{-\frac{k-2r}{k}\eta}(k-2r) &= 0\\
+        ke^{-\eta}\left[(1-\epsilon_t) - \epsilon_t e^{\frac{2\eta}{k}}\right]\left[(1-\epsilon_t) + \epsilon_t e^{\frac{2\eta}{k}}\right]^{k-1} &= 0\\
+        \eta &= \frac{k}{2}\log\left(\frac{1-\epsilon_t}{\epsilon_t}\right)
+    \end{align*}
+    Again we use \emph{Wolfram Mathematica} to get the closed form for the summation. In the last step we notice that all the factors are strictly positive except for $\left[(1-\epsilon_t) - \epsilon_t e^{\frac{2\eta}{k}}\right]$. Setting this factor to $0$ and solving for $\eta$ gives us the desired value, which coincides with the selection made in \emph{AdaBoost.MH2} for the parameter $\alpha_t$.
+    \item \textbf{Generalization bound}\\
+    Finally, we derive an upper bound on the emprical error of \emph{AdaBoost.MH2}. Using the result from exercise 2 we write
+    \begin{align*}
+        \widehat{R}(h) &= \frac{1}{m}\sum_{i=1}^m \sum_{l=1}^k 1_{y_i[l]\ne sgn\left( \sum_{t=1}^T \alpha_t h_t(x_i,l)\right)}\\
+        &\leq \frac{k}{m} G(\alpha)\\
+        &= \frac{k}{m} \sum_{i=1}^m \exp\left[-\frac{1}{k}\sum_{t=1}^{T}\alpha_tS_t(i)\right]\\
+        &= \frac{k}{m} \sum_{i=1}^m D_t(i) \cdot m \prod_{t=1}^T Z_t\\
+        &=k \prod_{t=1}^T Z_t
+    \end{align*}
+    All that's left is to find a closed form for the product of the regularization factors $Z_t$:
+    \begin{align*}
+        Z_t &= \sum_{i=1}^mD_t(i)e^{-\frac{1}{k}\alpha_t S_t(i)}\\
+        &= \sum_{r=0}^k \binom{k}{r} \epsilon_t^r (1-\epsilon_t)^{k-r} e^{-\frac{k-2r}{k}\alpha_t} \\
+        &= \left[(1-\epsilon_t)e^{-\frac{\alpha_t}{k}} + \epsilon_t e^{\frac{\alpha_t}{k}}\right]^k\\
+        &= \left[(1-\epsilon_t)\sqrt{\frac{\epsilon_t}{1-\epsilon_t}} + \epsilon_t \sqrt{\frac{1-\epsilon_t}{\epsilon_t}}\right]^k\\
+        &= \left[2\sqrt{\epsilon_t(1-\epsilon_t)}\right]^k
+    \end{align*}
+    Plugging this value into the upper bound for $\widehat{R}(h)$ we get
+    \begin{align*}
+        \widehat{R}(h) &\leq k \prod_{t=1}^T \left[2\sqrt{\epsilon_t(1-\epsilon_t)}\right]^k \\
+        &= k \left[\prod_{t=1}^T 2\sqrt{\epsilon_t(1-\epsilon_t)}\right]^k \\
+        &= k \left[\prod_{t=1}^T \sqrt{1 - 4\left(\frac{1}{2}-\epsilon_t\right)^2}\right]^k \\
+        &= k \left[\prod_{t=1}^T \exp \left[-2 \left(\frac{1}{2}-\epsilon_t\right)^2\right]\right]^k \\
+        &\leq k \left[\exp\left[-2\sum_{t=1}^T \left(\frac{1}{2}-\epsilon_t\right)^2\right]\right]^k\\
+        &= k \exp\left[-2k\sum_{t=1}^T \left(\frac{1}{2}-\epsilon_t\right)^2\right]
+    \end{align*}
+    The analysis is basically the same as the one used to prove Theorem 6.1 from the textbook.
+\end{enumerate}
+
+\end{document}
+

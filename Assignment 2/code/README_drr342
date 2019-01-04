@@ -1,0 +1,12 @@
+To recreate the experiments for Homework 2 run
+./run.sh
+
+The output files generated with this command are also available in the output folder:
+    1) data1.csv - Results of the first experiment
+    2) data2.csv - Results of the second experiment
+    3) scale.params - Scaling parameters generated with svm-scale
+    4) svmguide1.model - SVM model generated with svm-train
+    5) svmguide1.test - Test dataset
+    6) svmguide1.test.scale - Scaled test dataset (generated with svm-scale)
+    7) svmguide1.train - Train dataset
+    8) svmguide1.train.scale - Scaled train dataset (generated with svm-scale)

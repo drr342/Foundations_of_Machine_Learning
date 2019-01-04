@@ -1,0 +1,496 @@
+\documentclass{article}
+
+%\usepackage{times}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage[psamsfonts]{amssymb}
+\usepackage{latexsym}
+\usepackage{color}
+\usepackage{graphics}
+\usepackage{enumerate}
+\usepackage{amstext}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{comment}
+\usepackage[mathscr]{euscript}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{booktabs} 
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=newest}
+\pgfplotsset{width=15cm,compat=1.9}
+
+\usepackage{fancyhdr}
+\usepackage[final]{main}
+
+\DeclareMathOperator{\conv}{conv}
+
+\def\Kset{\mathbb{K}}
+\def\Nset{\mathbb{N}}
+\def\Qset{\mathbb{Q}}
+\def\Rset{\mathbb{R}}
+\def\Sset{\mathbb{S}}
+\def\Zset{\mathbb{Z}}
+
+\def\squareforqed{\hbox{\rlap{$\sqcap$}$\sqcup$}}
+\def\qed{\ifmmode\squareforqed\else{\unskip\nobreak\hfil
+\penalty50\hskip1em\null\nobreak\hfil\squareforqed
+\parfillskip=0pt\finalhyphendemerits=0\endgraf}\fi}
+
+\DeclareMathOperator*{\E}{\rm E}
+\DeclareMathOperator*{\argmax}{\rm argmax}
+\DeclareMathOperator*{\argmin}{\rm argmin}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\supp}{sup}
+\DeclareMathOperator{\last}{last}
+\DeclareMathOperator{\Card}{Card}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\norm}[1]{\lVert#1\rVert}
+\def\vcdim{\textnormal{VCdim}}
+
+\newcommand{\cA}{{\mathscr A}}
+\newcommand{\cB}{{\mathscr B}}
+\newcommand{\cC}{{\mathscr C}}
+\newcommand{\cD}{{\mathscr D}}
+\newcommand{\cE}{{\mathscr E}}
+\newcommand{\cF}{{\mathscr F}}
+\newcommand{\cG}{{\mathscr G}}
+\newcommand{\cH}{{\mathscr H}}
+\newcommand{\cI}{{\mathscr I}}
+\newcommand{\cK}{{\mathscr K}}
+\newcommand{\cS}{{\mathscr S}}
+\newcommand{\cQ}{{\mathscr Q}}
+\newcommand{\cU}{{\mathscr U}}
+\newcommand{\cV}{{\mathscr V}}
+\newcommand{\cX}{{\mathscr X}}
+\newcommand{\cY}{{\mathscr Y}}
+\newcommand{\cZ}{{\mathscr Z}}
+
+\newcommand{\mat}[1]{{\mathbf #1}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bmu}{\boldsymbol{\mu}}
+\newcommand{\ba}{\mat{a}}
+\newcommand{\bu}{\mat{u}}
+\newcommand{\bw}{\mat{w}}
+\renewcommand{\v}{\mat{v}}
+\newcommand{\w}{\mat{w}}
+\newcommand{\bx}{\mat{x}}
+\newcommand{\bX}{\mat{X}}
+\newcommand{\sfp}{{\mathsf p}}
+\newcommand{\sfq}{{\mathsf q}}
+\newcommand{\Alpha}{{\boldsymbol \alpha}}
+\newcommand{\Mu}{{\boldsymbol \mu}}
+\newcommand{\ssigma}{{\boldsymbol \sigma}}
+\newcommand{\ignore}[1]{}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\be}{\begin{enumerate}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+\newcommand{\h}{\widehat}
+\newcommand{\tl}{\widetilde}
+\newcommand{\e}{\epsilon}
+\renewcommand{\H}{\text{0}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\scrH}{{\mathscr H}}
+\newcommand{\T}{\text{1}}
+\newcommand{\set}[2][]{#1 \{ #2 #1 \} }
+\newcommand{\R}{\mathfrak{R}}
+\newcommand{\hint}{\emph{hint}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textbf{Daniel Rivera Ruiz}}
+\lhead{\textbf{Foundations of Machine Learning Fall 2018\\Homework 2}}
+\cfoot{\thepage}
+
+\begin{document}
+
+\section*{A. Rademacher complexity}
+
+
+\begin{enumerate}
+\item Consider the class of functions
+  $\cH$ mapping from $\Rset$ to $\{+1, -1\}$ such that
+\begin{equation*}
+h(x) =
+\begin{cases}
+               +1 \text{ for } x \in [a, b],\\
+               -1 \text{ otherwise },
+            \end{cases}
+\end{equation*}
+for some $a, b \in \Rset$.
+Give an upper bound on the growth function $\Pi_{\cH}(m)$ and use it to
+derive an upper bound on the $\R_{m}(\cH)$.
+
+\textbf{\emph{Solution:}}\\
+By definition, $\cH$ is the hypothesis class of intervals in the real line and therefore 
+\begin{equation*}
+    \vcdim(\cH) = d = 2
+\end{equation*}
+Plugging in  this value into \emph{Sauer's Lemma} (corollary 3.3 in the textbook) we get:
+\begin{equation*}
+    \Pi_{\cH}(m) \leq \left(\frac{em}{2}\right)^2
+\end{equation*}
+Finally we use \emph{Massart's Lemma} (corollary 3.1 in the textbook) to upper bound $\R_{m}(\cH)$:
+\begin{align*}
+    \R_{m}(\cH) &\leq \sqrt{\frac{2 log \Pi_{\cH}(m)}{m}}\\
+                &\leq \sqrt{\frac{2 log\left[ \left(\frac{em}{2}\right)^2\right]}{m}}\\
+                &\leq 2\sqrt{\frac{log\left(\frac{em}{2}\right)}{m}}
+\end{align*}
+
+\item Prove that for any hypotheses class $\cH$ and any function
+$h_0\colon \cX \mapsto \Rset$, $\R_{m}(\cH) = \R_{m}(\cH + h_0)$.
+
+\textbf{\emph{Solution:}}\\
+\begin{align*}
+    \R_m(\cH + h_0) &= \underset{S \sim D^m}{E}\left[\widehat{\R}_{S}(\cH + h_0)\right]\\
+                  &= \underset{S}{E}\left[\underset{\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(\frac{1}{m}\sum_{i=1}^{m}\sigma_i [h(z_i) + h_0(z_i)]\right)\right]\right]\\
+                  &= \underset{S,\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(\frac{1}{m}\sum_{i=1}^{m}\sigma_ih(z_i)\right)\right] + \underset{S,\sigma}{E}\left[\frac{1}{m}\sum_{i=1}^{m}\sigma_ih_0(z_i)\right]\\
+                  &= \R_m(\cH) + \underset{S}{E}\left[\frac{1}{m}\sum_{i=1}^{m}\underset{\sigma}{E}[\sigma_i]h_0(z_i)\right]\\
+                  &= \R_m(\cH) \textit \quad {(Q.E.D.)}
+\end{align*}
+\begin{itemize}
+    \item The first step is straightforward from the definition of Rademacher complexity for $\cH^\prime = \cH + h_0$.
+    \item The second step follows from the linearity of expectation and linearity of supremum (a proof for the linearity of supremum can be found \href{https://proofwiki.org/wiki/Supremum_of_Sum_equals_Sum_of_Suprema}{here}). Also, the second summation is constant with respect to $h$ so we can get rid of the supremum.
+    \item The third step uses the definition of Rademacher complexity for $\cH$ and linearity of expectation.
+    \item Finally, the last step follows from the fact that $E_{\sigma}[\sigma_i]=0$ since the $\sigma_i$ are Rademacher variables.
+\end{itemize}
+
+\item Prove that if for two hypotheses classes $\cH$ and
+  $\cF$ the inclusion $\cH \subseteq \cF$ holds,
+  then the following inequality holds for any finite sample $S$:
+  $\widehat{\R}_{S}(\cH) \leq \widehat{\R}_{S}(\cF)$.
+  
+\textbf{\emph{Solution:}}\\
+Let us define the following sets:
+\begin{align*}
+    S_{\cH} = \left\{\sum_{i=1}^{m}\sigma_ih(z_i): h \in \cH \right\} \quad
+    S_{\cF} = \left\{\sum_{i=1}^{m}\sigma_if(z_i): f \in \cF \right\}\\
+\end{align*}
+Given the definition of the Rademacher complexity, proving that $\widehat{\R}_{S}(\cH) \leq \widehat{\R}_{S}(\cF)$ is equivalent to proving $\supp(S_{\cH}) \leq \supp(S_{\cF})$. Since we are considering a finite sample of size $m$, both suprema must exist. Furthermore, since we know $\cH \subseteq \cF$, it must follow that $S_\cH \subseteq S_\cF$.\\
+Now we suppose that $\supp(S_{\cH}) > \supp(S_{\cF})$. Under this assumption, it must exist an element $e \in S_\cH$ such that $e > \supp(S_{\cF})$. But if $e \in S_\cH$ and $S_\cH \subseteq S_\cF$, it must follow that $e \in S_\cF$ which contradicts the definition of $\supp(S_{\cF})$. Therefore, it must be that $\supp(S_{\cH}) \leq \supp(S_{\cF})$ which implies $\widehat{\R}_{S}(\cH) \leq \widehat{\R}_{S}(\cF)$ \emph{(Q.E.D.)}\\
+Intuitively, if we plug $\cH$ into the definition of Rademacher complexity, the supremum is taken over all the functions in $\cH$. On the other hand if we consider the Rademacher complexity of $\cF$, the supremum will increase (or at least remain the same) because it is taken over a larger domain.
+
+\item Let $\cH_1$ be a family of functions mapping $\cX$ to $\set{0, 1}$
+  and let $\cH_2$ be a family of functions mapping $\cX$ to
+  $\set{-1, +1}$. Let
+  $\cH = \set{h_1 h_2\colon h_1 \in \cH_1, h_2\in \cH_2}$. Show that the
+  empirical Rademacher complexity of $\cH$ for any sample $S$ of size
+  $m$ can be bounded as follows:
+\begin{equation*}
+\h \R_S(\cH) \leq  \h \R_S(\cH_1) + \h \R_S(\cH_2).
+\end{equation*}
+
+\textbf{\emph{Solution:}}\\
+First we rewrite $h_1h_2$ as follows:
+\begin{equation*}
+    h_1h_2 = \frac{1}{2}\left[\left|h_1 + h_2\right|-\left|h_1 - h_2\right|\right]
+\end{equation*}
+And with this new definition for $h \in \cH$ we write:
+\begin{align*}
+     \h \R_S(\cH)&= \underset{\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(\frac{1}{m}\sum_{i=1}^{m}\sigma_i\left(\frac{1}{2}\left[\left|h_1 + h_2\right|-\left|h_1 - h_2\right|\right]\right)\right)\right]\\
+                 &= \underset{\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(\frac{1}{2m}\sum_{i=1}^{m}\sigma_i\left|h_1 + h_2\right|\right) + \underset{h \in \cH}{\supp}\left(-\frac{1}{2m}\sum_{i=1}^{m}\sigma_i\left|h_1 - h_2\right|\right)\right]\\
+                 &= \underset{\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(\frac{1}{2m}\sum_{i=1}^{m}\sigma_i\left|h_1 + h_2\right|\right)\right] + \underset{\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(-\frac{1}{2m}\sum_{i=1}^{m}\sigma_i\left|h_1 - h_2\right|\right)\right]\\
+                 &\leq \underset{\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(\frac{1}{2m}\sum_{i=1}^{m}\sigma_i\left(h_1 + h_2\right)\right)\right] + \underset{\sigma}{E}\left[\underset{h \in \cH}{\supp}\left(-\frac{1}{2m}\sum_{i=1}^{m}\sigma_i\left(h_1 - h_2\right)\right)\right]\\
+                 &\leq \frac{1}{2}\left[\h \R_S(\cH_1 + \cH_2)\right] + \frac{1}{2}\left[\h \R_S(\cH_1 - \cH_2)\right]\\
+                 &\leq \h \R_S(\cH_1) + \h \R_S(\cH_2) \textit \quad {(Q.E.D.)}
+\end{align*}
+\begin{itemize}
+    \item The first three steps are straightforward by the linearity of summation, supremum and expectation.
+    \item In the fourth step we introduce the inequality by bounding the absolute value function (which is 1-Lipschitz) using \emph{Talagrand's inequality} (lemma 4.2 in the textbook).
+    \item Finally, we apply the Rademacher complexity definition and two basic properties to complete the proof: linearity $\R(\cH_1+\cH_2) = \R(\cH_1)+\R(\cH_2)$, which must hold since $\R$ is defined in terms of linear operators supremum and summation, and multiplication by a scalar $\R(\alpha\cH) = |\alpha|\R(\cH)$, which introduces the absolute value of $\alpha$ because the Rademacher variables $\sigma_i$ and $-\sigma_i$ follow the same distribution.
+\end{itemize}
+\end{enumerate}
+
+\section*{B. VC-dimension}
+\begin{enumerate}
+\item What is the VC-dimension of axis-aligned squares in $\mathbb{R}^2$?
+
+\textbf{\emph{Solution:}}\\
+If we consider the set of 3 points $S = \{P_1(0, 0), P_2(2d, 0), P_3(d, d)\}$, it can be fully shattered by axis-aligned squares:
+\begin{itemize}
+    \item To label positively $P_1$ and $P_2$, we use the square defined by $\{P_1,P_2,(0,2d),(2d,2d)\}$.
+    \item To label positively $P_1$ and $P_3$, we use the square defined by $\{P_1,P_3,(0,d),(d,0)\}$.
+    \item To label positively $P_2$ and $P_3$, we use the square defined by $\{P_2,P_3,(2d,d),(d,0)\}$.
+    \item The remaining 5 labelings are straightforward.
+\end{itemize}
+So the VC-dimension must be at least 3. To prove that no set of 4 points can be fully shattered we do the following:
+\begin{itemize}
+    \item Let $P_{maxY}$ be the point with the bigger $y$-coordinate and $P_{minY}$ the point with the smaller $y$-coordinate. Similarly we define $P_{maxX}$ and $P_{minX}$ and assume that there are no ties, i.e. the 4 points can be defined in a unique way.
+    \item Let $d_y$ be the vertical distance between $P_{maxY}$ and $P_{minY}$, and $d_x$ the horizontal distance between $P_{maxX}$ and $P_{minX}$.
+    \item If $d_x \geq d_y$, the labeling with $P_{maxX}$ and $P_{minX}$ positive is not possible, since at least one of $P_{maxY}$ and $P_{minY}$ would lie within the square.
+    \item Similarly, if $d_y \geq d_x$ the labeling with $P_{maxY}$ and $P_{minY}$ positive is not possible.
+\end{itemize}
+The special cases for which the 4 points are not uniquely defined can be approached using the same analysis:
+\begin{itemize}
+    \item If any two points have the same value for the $x$ or $y$ coordinate and it is the maximum/minimum, we can arbitrarily choose any of the two as the maximum/minimum.
+    \item The analysis doesn't rely on the fact that $P_{maxY} \neq P_{maxX}$ or any other such relationship, so a single point can in fact be maximum/minimum in both axes.
+\end{itemize}
+Since no set of $4$ points can be fully shattered, the VC-dimension of axis-aligned squares in the plane must be 3.
+
+\item What is the VC-dimension of intersections of 2 axis-aligned squares in $\mathbb{R}^2$?
+
+\textbf{\emph{Solution:}}\\
+The intersection of two axis-aligned squares is an axis-aligned rectangle, and therefore the VC-dimension is 4 (The proof for the VC-dimension of axis-aligned rectangles was covered in class).
+
+\item (Bonus) Let $C$ be a concept class whose VC-dimension is $3$. Show that the VC-dimension of intersections of $k$ concepts from $C$ is upper bounded by $6k \log_2(3k)$.
+(\hint: use Sauer's lemma.)
+
+\textbf{\emph{Solution:}}\\
+To be able to apply Sauer's lemma, we will first prove that the following inequality holds:
+\begin{equation*}
+    \Pi_C(m) \leq \Pi_{C_1}(m)\Pi_{C_2}(m)
+\end{equation*}
+Where $C = C_1 \cap C_2$. First we take any set $X$ of $m$ points and define $k_1$ and $k_2$ as the number of distinct subsets of $X$ that are positively labeled by the concepts in $C_1$ and $C_2$, respectively. By definition of the growth function we have that $k_1 \leq \Pi_{C_1}(X) \leq \Pi_{C_1}(m)$ and $k_2 \leq \Pi_{C_2}(X) \leq \Pi_{C_2}(m)$.\\
+Now we notice that the subsets of $X$ that are positively labeled by the concepts in $C$ are formed by intersections of the subsets of $X$ positively labeled by the concepts in $C_1$ and the subsets of $X$ positively labeled by the concepts in $C_2$. Therefore, the number of distinct positively labeled subsets of $X$ by the concepts in $C$ satisfies $\Pi_C(X) \leq k_1 k_2 \leq \Pi_{C_1}(m) \Pi_{C_2}(m)$.\\
+Since this holds for all $X$ of size $m$, we conclude that $\Pi_C(m) \leq \Pi_{C_1}(m)\Pi_{C_2}(m)$ \textit{(Q.E.D)}.\\
+Using this result, we define $C_k$ to be the concept class formed by all intersections of $k$ concepts from $C$ and we write
+\begin{equation*}
+    \Pi_{C_k}(m) \leq \left(\Pi_C(m)\right)^k
+\end{equation*}
+Which using Sauer's lemma and corollary 3.3 from the textbook (with $d = 3$) implies
+\begin{equation*}
+    \Pi_{C_k}(m) \leq \left(\frac{em}{3}\right)^{3k}
+\end{equation*}
+Now we notice that if $\left(\frac{em}{3}\right)^{3k} < 2^m$, it must follow that the VC-dimension of $C_k$ is less than $m$. So we just need to show that this inequality holds for $m = 6k \log_2(3k)$:
+\begin{align*}
+    \left(\frac{6ek \log_2(3k)}{3}\right)^{3k} &< 2^{6k \log_2(3k)}\\
+    \left(\frac{6ek \log_2(3k)}{3}\right)^{3k} &< \left(2^{2\log_2(3k)}\right)^{3k}\\
+    \frac{6ek \log_2(3k)}{3} &< (3k)^2\\
+    \log_2(3k) &< \frac{9k}{2e}
+\end{align*}
+Which is clearly true for all $k > 0$ and completes the proof.
+\end{enumerate}
+\clearpage
+\section*{C. Support Vector Machines}
+\begin{enumerate}
+\item Download and install the \texttt{libsvm} software library.
+\item Consider the shuffled version of the \texttt{svmguide1} dataset. Use the \texttt{libsvm} scaling tool to scale the features of all the data. Use the first 2316 examples for training and the last 773 for testing. The scaling parameters should be computed only on the training data and then applied to the test data.
+\item Consider the binary classification task in \texttt{svmguide1}, using the 4 features. Randomly split the training data into ten equal-sized disjoint sets. For each value of the polynomial degree, $d = 1,2,3,4$, plot the average cross-validation error plus or minus one standard deviation as a function of $C$ varying $C$ in powers of $2$, starting from a small value $C = 2^{-k}$ to $C = 2^k$, for some values of $k$.\\
+\textbf{\emph{Solution:}}\\
+Figure \ref{plot1} shows the desired plot.
+
+\item Let $(C^*,d^*)$ be the best pair found previously. Fix $C$ to be $C^*$. Plot the following results as a function of $d$:
+\begin{enumerate}
+\item The average ten-fold cross-validation error, and the test error for the hypotheses obtained by running SVMs on the whole training set.
+\item The average number of support vectors, and the average number of support vectors that lie on the marginal hyperplanes.
+\end{enumerate}  
+\textbf{\emph{Solution:}}\\
+From the previous exercise we fix $C^* = 2^{13} = 8\,192$, which yields the best average cross-validation error $e = 0.0302245$ when $d = 3$. Using this value of $C^*$, Figures \ref{plot2} and \ref{plot3} show the desired plots. The results obtained with \texttt{libsvm} include only the total number of support vectors $SV$ and the number of boundary support vectors $BSV$ (associated to outliers). To calculate the number of suport vectors on the marginal hyperplanes we simply do $MSV = SV - BSV$.
+
+\item SVMs are ``sparse" in the sense that the number of support vectors is usually small compared to total number of observations. Suppose we explicitly maximize sparsity by penalizing the $L_2$ norm of the vector $\alpha$ that defines the weight vector $w$:
+\begin{align*}
+\min_{\alpha,b,\xi} \quad &\frac{1}{2} \parallel \alpha \parallel^2+ 
+C\left(\sum_{i=1}^m \xi_i\right)\\
+\text{subject to}\quad & y_i \left(\left(\sum_{j=1}^m \alpha_j y_j x_j\right)\cdot x_i + b\right) \geq 1-\xi_i, \\ 
+& \xi_i\geq0, \alpha_i \geq 0, i\in [1,m].
+\end{align*}
+Show that the problem coincides with an instance of the primal optimization problem of SVMs, modulo the non-negativity constraint on $\alpha$. You should indicate exactly how to view it as such.\\
+\textbf{\emph{Solution:}}\\
+If we introduce the auxiliary variables
+\begin{equation*}
+    \bm{z_i} = (x_ix_1y_1, x_ix_2y_2, \ldots, x_ix_my_m)
+\end{equation*}
+The inner product of $\bm{\alpha}$ and $\bm{z_i}$ is given by
+\begin{equation*}
+    \bm{\alpha} \cdot \bm{z_i} = \sum_{j=1}^m \alpha_j z_j = \sum_{j=1}^m \alpha_j x_ix_jy_j
+\end{equation*}
+Which is exactly the expression that we have in the conditions of our original problem so we can write
+\begin{align*}
+\min_{\alpha,b,\xi} \quad &\frac{1}{2} \parallel \alpha \parallel^2 + C \sum_{i=1}^m \xi_i \\
+\text{subject to}\quad & y_i \left(\bm{\alpha} \cdot \bm{z_i} + b\right) \geq 1-\xi_i, \\ 
+& \xi_i\geq0, \alpha_i \geq 0, i\in [1,m].
+\end{align*}
+Aside from the non-negativity constraints on the $\alpha_i$, this new formulation of the problem coincides with the standard formulation of a primal SVM optimization problem on samples $\bm{z_i}$ \emph{(Q.E.D.)}
+\end{enumerate}
+
+\pgfplotstableread[col sep = comma, header = true]{data/data1.csv}\data
+\pgfplotstableread[col sep = comma, header = true]{data/data2.csv}\dataTest
+\begin{figure}
+    \centering
+    \caption{Average cross-validation error as a function of the trade-off parameter $C$ for different values of the degree $d$ of the polynomial kernel.}
+    \label{plot1}
+    \begin{tikzpicture}
+        \begin{groupplot}[group style={group size=2 by 2},height=\textwidth/2,width=\textwidth/2]
+            \nextgroupplot[
+                xlabel={$C$},
+                ylabel={Error},
+                ymin=0, ymax=0.4,
+                legend pos=north east,
+                ymajorgrids=true,
+                xmajorgrids=true,
+                yminorgrids=true,
+                minor tick num=2,
+                grid style=dashed,
+                xmode=log,
+                log basis x={2},
+                no markers
+            ]
+                \addplot+[color=blue] table[x=C,y=pe1] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe1}+\thisrow{sd1}] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe1}-\thisrow{sd1}] {\data};
+                \addlegendentry{$d=1$}
+            \nextgroupplot[
+                xlabel={$C$},
+                % yticklabels={,,},
+                ymin=0, ymax=0.4,
+                legend pos=north east,
+                ymajorgrids=true,
+                xmajorgrids=true,
+                yminorgrids=true,
+                minor tick num=2,
+                grid style=dashed,
+                xmode=log,
+                log basis x={2},
+                no markers
+            ]
+                \addplot+[color=blue] table[x=C,y=pe2] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe2}+\thisrow{sd2}] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe2}-\thisrow{sd2}] {\data};
+                \addlegendentry{$d=2$}
+            \nextgroupplot[
+                xlabel={$C$},
+                ylabel={Error},
+                ymin=0, ymax=0.4,
+                legend pos=north east,
+                ymajorgrids=true,
+                xmajorgrids=true,
+                yminorgrids=true,
+                minor tick num=2,
+                grid style=dashed,
+                xmode=log,
+                log basis x={2},
+                no markers
+            ]
+                \addplot+[color=blue] table[x=C,y=pe3] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe3}+\thisrow{sd3}] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe3}-\thisrow{sd3}] {\data};
+                \addlegendentry{$d=3$}
+            \nextgroupplot[
+                xlabel={$C$},
+                % yticklabels={,,},
+                ymin=0, ymax=0.4,
+                legend pos=north east,
+                ymajorgrids=true,
+                xmajorgrids=true,
+                yminorgrids=true,
+                minor tick num=2,
+                grid style=dashed,
+                xmode=log,
+                log basis x={2},
+                no markers
+            ]
+                \addplot+[color=blue] table[x=C,y=pe4] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe4}+\thisrow{sd4}] {\data};
+                \addplot+[dashed, color=blue] table[x=C,y expr=\thisrow{pe4}-\thisrow{sd4}] {\data};
+                \addlegendentry{$d=4$}
+        \end{groupplot}
+    \end{tikzpicture}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \caption{Training error (Mean cross-validation error) and Test error as a function of the degree $d$ of the polynomial kernel.}
+    \label{plot2}
+    \begin{tikzpicture}
+        \begin{axis}[
+            % title={Training error and Test error vs. $d$},
+            height=10cm,
+            width=\textwidth,
+            xlabel={$d$},
+            ylabel={Average Error},
+            % xmin=0.000976562, xmax=32768,
+            % ymin=0, ymax=0.4,
+            %xtick={0,20,40,60,80,100},
+            %ytick={0,20,40,60,80,100,120},
+            legend pos=north west,
+            ymajorgrids=true,
+            xmajorgrids=true,
+            yminorgrids=true,
+            minor tick num=1,
+            grid style=dashed,
+            mark size=1.0pt,
+        ]
+        \addplot[
+            color =  blue,
+            mark=*
+        ]
+        table[x=d,y=err_train] {\dataTest};
+        \addlegendentry{Train}
+        \addplot[
+            color =  red,
+            mark=*
+        ]
+        table[x=d,y=err_test] {\dataTest};
+        \addlegendentry{Test}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \caption{Support Vectors (SV) and Support Vectors on Marginal Hyperplanes (MSV) as a function of the degree $d$ of the polynomial kernel.}
+    \label{plot3}
+    \begin{tikzpicture}
+        \begin{axis}[
+            % title={SVs and Bounded SVs vs. $d$},
+            height=10cm,
+            width=\textwidth,
+            xlabel={$d$},
+            ylabel={\#SVs},
+            % xmin=0.000976562, xmax=32768,
+            % ymin=0, ymax=0.4,
+            %xtick={0,20,40,60,80,100},
+            %ytick={0,20,40,60,80,100,120},
+            legend pos=north west,
+            ymajorgrids=true,
+            xmajorgrids=true,
+            yminorgrids=true,
+            minor tick num=1,
+            grid style=dashed,
+            mark size=1.0pt,
+        ]
+        \addplot[
+            color =  blue,
+            mark=*
+            % error bars/.cd,
+            % y dir=both, 
+            % y explicit
+        ]
+        table[x=d,y=nSV] {\dataTest};
+        \addlegendentry{SV}
+        \addplot[
+            color =  red,
+            mark=*
+            % error bars/.cd,
+            % y dir=both, 
+            % y explicit
+        ]
+        table[x=d,y expr=\thisrow{nSV}-\thisrow{nBSV}] {\dataTest};
+        \addlegendentry{MSV}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+
+% \pgfplotstabletypeset[
+%     col sep = comma,
+%     string replace*={_}{\textsubscript},
+%     every head row/.style={before row=\toprule,after row=\midrule},
+%     every last row/.style={after row=\bottomrule},
+%     display columns/0/.style={string type,column name={}}
+% ]
+% {\data}
+
+\end{document}
+
